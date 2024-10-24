@@ -1,0 +1,21 @@
+
+
+services:
+  redis:
+    hostname: sync-hltb-redis
+    image: redis:latest
+    ports:
+      - "9112:6379"
+    environment:
+      ALLOW_EMPTY_PASSWORD: 'yes'
+
+    restart: no
+
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+
+    volumes:
+      - redis:/data
+
+volumes:
+  redis:

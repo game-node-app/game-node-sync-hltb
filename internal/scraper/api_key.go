@@ -20,14 +20,14 @@ func GetApiKey() (string, error) {
 		colly.Async(true),
 	)
 
-	c.Limit(&colly.LimitRule{
+	var result string
+	var err error = nil
+
+	err = c.Limit(&colly.LimitRule{
 		DomainGlob:  "*",
 		Delay:       1 * time.Second,
 		RandomDelay: 1 * time.Second, // Add some randomness to the delay
 	})
-
-	var result string
-	var err error = nil
 
 	// Set Fake User Agent
 	c.OnRequest(func(r *colly.Request) {
