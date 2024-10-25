@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"game-node-sync-hltb/internal/scraper"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -28,7 +29,9 @@ func Games(q string) (*HLTBResponse, error) {
 		return nil, err
 	}
 
-	searchCriteria := strings.Split(q, " ")
+	parsedGameName := parseGameName(q)
+	log.Printf(" [X] Parsed game game - from: %s to: %s", q, parsedGameName)
+	searchCriteria := strings.Split(parsedGameName, " ")
 	targetUrl := searchEndpoint(apiKey)
 	body := searchBody(searchCriteria)
 
