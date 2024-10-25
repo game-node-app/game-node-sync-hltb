@@ -2,11 +2,12 @@ package queue
 
 import (
 	"encoding/json"
+	"fmt"
 	"game-node-sync-hltb/internal/search"
 	"github.com/hibiken/asynq"
 )
 
-// TypeUpdateRequest A list of task types.
+// A list of task types.
 const (
 	TypeUpdateRequest = "update.request"
 )
@@ -27,7 +28,11 @@ func CreateUpdateTask(r *UpdateRequest) (*asynq.Task, error) {
 		return nil, err
 	}
 
-	task := asynq.NewTask(TypeUpdateRequest, payload)
+	task := asynq.NewTask(
+		TypeUpdateRequest, payload,
+		asynq.TaskID(fmt.Sprintf("update-request-%d", r.Id)),
+		asynq.MaxRetry(3),
+	)
 
 	return task, nil
 }

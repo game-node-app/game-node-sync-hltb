@@ -4,43 +4,50 @@ import (
 	"encoding/json"
 	"game-node-sync-hltb/internal/queue"
 	"game-node-sync-hltb/internal/util"
+	"game-node-sync-hltb/internal/util/redis"
 	"github.com/hibiken/asynq"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"log"
 )
 
 func main() {
-	rabbitMqUrl := util.GetEnv("RABBITMQ_URL", "amqp://gamenode:gamenode@localhost:5672")
+	rabbitMqUrl := util.RMQUrl()
 
-	redisAddr := util.RedisURL()
+	redisAddr := redis.Url()
 	asyncqClient := asynq.NewClient(asynq.RedisClientOpt{Addr: redisAddr})
 
 	defer asyncqClient.Close()
 
 	conn, err := amqp.Dial(rabbitMqUrl)
+
 	if err != nil {
 		log.Fatalf("Failed to connect to RabbitMQ: %s", err)
 		return
 	}
+
+	defer conn.Close()
 
 	channel, err := conn.Channel()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = channel.QueueDeclare("sync-hltb", true, false, false, false, nil)
+	err = channel.ExchangeDeclare("sync-hltb", "direct", true, false, false, false, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = channel.QueueBind("sync-hltb", "update.request", "sync", false, nil)
+	_, err = channel.QueueDeclare("sync.hltb.update.request", true, false, false, false, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = channel.QueueBind("sync-hltb", "update.response", "sync", false, nil)
+	err = channel.QueueBind("sync.hltb.update.request", "sync.hltb.update.request", "sync-hltb", false, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	msgs, err := channel.Consume("sync-hltb", "", true, false, false, false, nil)
+	msgs, err := channel.Consume("sync.hltb.update.request", "", true, false, false, false, nil)
 
 	var forever chan struct{}
 
@@ -70,8 +77,7 @@ func main() {
 		}
 	}()
 
-	log.Printf(" [*] Waiting for messages on %s -> %s. To exit press CTRL+C", "sync-hltb", "update.request")
+	log.Printf(" [*] Waiting for messages on %s -> %s. To exit press CTRL+C", "sync-hltb", "sync.hltb.update.request")
 	<-forever
 
-	defer conn.Close()
 }

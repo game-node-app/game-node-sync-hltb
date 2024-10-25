@@ -1,0 +1,55 @@
+
+
+services:
+  redis:
+    hostname: sync-hltb-redis
+    image: redis:latest
+
+    environment:
+      ALLOW_EMPTY_PASSWORD: 'yes'
+
+    restart: always
+
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+
+    volumes:
+      - redis:/data
+
+    networks:
+      - game_node_app
+
+  listener:
+    image: lamarcke/game-node-sync-hltb:latest
+
+    environment:
+      REDIS_ADDR: 'sync-hltb-redis:6379'
+      RABBITMQ_URL: 'amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq'
+
+    command: "/app/listener"
+
+    restart: always
+
+    networks:
+      - game_node_app
+
+  processor:
+    image: lamarcke/game-node-sync-hltb:latest
+
+    environment:
+      REDIS_ADDR: 'sync-hltb-redis:6379'
+      RABBITMQ_URL: 'amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq'
+
+    command: "/app/processor"
+
+    restart: always
+
+    networks:
+      - game_node_app
+
+volumes:
+  redis:
+
+networks:
+  game_node_app:
+    external: true

@@ -1,0 +1,81 @@
+
+
+services:
+  redis:
+    hostname: sync-hltb-redis
+    image: redis:latest
+
+    environment:
+      ALLOW_EMPTY_PASSWORD: 'yes'
+
+    restart: no
+
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+
+    volumes:
+      - redis:/data
+
+    networks:
+      - game_node_app
+
+  ####
+  # Only available here to allow dev testing!
+  ####
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    hostname: hltb-sync-rabbitmq
+    ports:
+      - "15672:15672" # communication with the web management API
+
+    restart: no
+
+    environment:
+      RABBITMQ_DEFAULT_USER: gamenode
+      RABBITMQ_DEFAULT_PASS: gamenode
+
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+    networks:
+      - game_node_app
+
+  listener:
+    build:
+      context: .
+
+    environment:
+      REDIS_ADDR: 'sync-hltb-redis:6379'
+      RABBITMQ_URL: 'amqp://gamenode:gamenode@hltb-sync-rabbitmq'
+
+    command: "/app/listener"
+
+    restart: no
+
+    networks:
+      - game_node_app
+
+  processor:
+    build:
+      context: .
+
+    environment:
+      REDIS_ADDR: 'sync-hltb-redis:6379'
+      RABBITMQ_URL: 'amqp://gamenode:gamenode@hltb-sync-rabbitmq'
+
+    command: "/app/processor"
+
+    restart: no
+
+    networks:
+      - game_node_app
+
+volumes:
+  redis:
+
+networks:
+  game_node_app:
+    driver: bridge

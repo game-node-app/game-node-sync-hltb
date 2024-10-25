@@ -3,6 +3,7 @@ package scraper
 import (
 	"errors"
 	"fmt"
+	"game-node-sync-hltb/internal/util/redis"
 	"github.com/gocolly/colly"
 	"io"
 	"log"
@@ -12,7 +13,23 @@ import (
 	"time"
 )
 
+const ApiStoreKey = "hltb-api-key"
+
+func storeApiKey(apiKey string) {
+	expiration := 3 * time.Hour
+	err := redis.Set(ApiStoreKey, apiKey, &expiration)
+	if err != nil {
+		log.Printf(" [!] Failed to store api key. Error: %v", err)
+	}
+}
+
 func GetApiKey() (string, error) {
+	keyInStore, err := redis.Get(ApiStoreKey)
+	if err == nil && keyInStore != "" {
+		log.Printf(" [X] Using apiKey from store...")
+		return keyInStore, nil
+	}
+
 	hltbBaseUrl := "https://howlongtobeat.com"
 
 	// Colly collector
@@ -21,7 +38,6 @@ func GetApiKey() (string, error) {
 	)
 
 	var result string
-	var err error = nil
 
 	err = c.Limit(&colly.LimitRule{
 		DomainGlob:  "*",
@@ -68,6 +84,7 @@ func GetApiKey() (string, error) {
 		submatch := r.FindStringSubmatch(bodyStr)
 		if len(submatch) > 0 {
 			result = submatch[1]
+			storeApiKey(result)
 		} else {
 			err = errors.New("could not find API key submatch")
 		}
