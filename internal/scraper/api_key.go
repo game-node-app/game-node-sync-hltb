@@ -16,7 +16,7 @@ import (
 const ApiStoreKey = "hltb-api-key"
 
 func storeApiKey(apiKey string) {
-	expiration := 3 * time.Hour
+	expiration := 1 * time.Hour
 	err := redis.Set(ApiStoreKey, apiKey, &expiration)
 	if err != nil {
 		log.Printf(" [!] Failed to store api key. Error: %v", err)
@@ -26,7 +26,7 @@ func storeApiKey(apiKey string) {
 func GetApiKey() (string, error) {
 	keyInStore, err := redis.Get(ApiStoreKey)
 	if err == nil && keyInStore != "" {
-		log.Printf(" [X] Using apiKey from store...")
+		log.Printf(" [x] Using apiKey from store...")
 		return keyInStore, nil
 	}
 

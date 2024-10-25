@@ -15,11 +15,12 @@ import (
 
 const (
 	FailedAttemptStoreKey = "hltb-failed-attempt-%d"
+	SuccessStoreKey       = "hltb-success-%d"
 )
 
 // Should only be used for matchless tries.
 func storeFailedAttempt(gameId int) {
-	var duration = 7 * 24 * time.Hour
+	var duration = 3 * 24 * time.Hour
 	var key = fmt.Sprintf(FailedAttemptStoreKey, gameId)
 	err := redis.Set(key, "true", &duration)
 	if err != nil {
@@ -27,8 +28,27 @@ func storeFailedAttempt(gameId int) {
 	}
 }
 
+func storeSuccess(gameId int) {
+	var duration = 7 * 24 * time.Hour
+	var key = fmt.Sprintf(SuccessStoreKey, gameId)
+	err := redis.Set(key, "true", &duration)
+	if err != nil {
+		log.Printf("failed to store success attempt %d: %v", gameId, err)
+	}
+}
+
 func hasFailedAttempt(gameId int) bool {
 	var key = fmt.Sprintf(FailedAttemptStoreKey, gameId)
+	result, err := redis.Get(key)
+	if err != nil {
+		return false
+	}
+
+	return result != ""
+}
+
+func hasSuccess(gameId int) bool {
+	var key = fmt.Sprintf(SuccessStoreKey, gameId)
 	result, err := redis.Get(key)
 	if err != nil {
 		return false
@@ -69,7 +89,7 @@ func publishMatch(res *UpdateResponse) error {
 		log.Printf(" [!] Failed to publish message! %s", err)
 	}
 
-	log.Printf(" [X] Sucessfully published response to queue: %s", "sync.hltb.update.response")
+	log.Printf(" [x] Sucessfully published response to queue: %s", "sync.hltb.update.response")
 
 	return nil
 }
@@ -82,11 +102,16 @@ func HandleUpdateRequest(ctx context.Context, t *asynq.Task) error {
 		return err
 	}
 
-	id := r.Id
+	id := r.GameId
 	name := r.Name
 
 	if recentFail := hasFailedAttempt(id); recentFail {
-		log.Printf(" [X] Skipping %d since it is recently failed...", id)
+		log.Printf(" [x] Skipping %d since it is recently failed...", id)
+		return nil
+	}
+
+	if recentSuccess := hasSuccess(id); recentSuccess {
+		log.Printf(" [x] Skipping %d since it has been processed recently...", id)
 		return nil
 	}
 
@@ -96,24 +121,26 @@ func HandleUpdateRequest(ctx context.Context, t *asynq.Task) error {
 		return fmt.Errorf("failed to find matches for gameId: %d - error: %s", id, err)
 	}
 
-	if hltbResp != nil && len(hltbResp.Data) > 0 {
-		log.Printf(" [X] Found at least one match for gameId: %d", id)
+	if hltbResp != nil && hltbResp.Data != nil && len(hltbResp.Data) > 0 {
+		log.Printf(" [x] Found at least one match for gameId: %d", id)
 		res := UpdateResponse{
-			Id:    id,
-			Match: hltbResp.Data[1],
+			GameId: id,
+			Match:  hltbResp.Data[0],
 		}
 		err = publishMatch(&res)
 		if err != nil {
 			return err
 		}
+
+		storeSuccess(id)
 	} else {
-		log.Printf(" [X] No match found for gameId: %d", id)
+		log.Printf(" [x] No match found for gameId: %d", id)
 		storeFailedAttempt(id)
 	}
 
 	// Request was successful, even if no results were found
 	time.Sleep(4 * time.Second)
-	log.Printf(" [X] Finished processing request for gameId: %d", id)
+	log.Printf(" [x] Finished processing request for gameId: %d", id)
 
 	return nil
 }

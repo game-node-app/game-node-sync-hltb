@@ -13,13 +13,13 @@ const (
 )
 
 type UpdateRequest struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
+	GameId int    `json:"gameId"`
+	Name   string `json:"name"`
 }
 
 type UpdateResponse struct {
-	Id    int                     `json:"id"`
-	Match search.HLTBResponseItem `json:"match"`
+	GameId int                     `json:"gameId"`
+	Match  search.HLTBResponseItem `json:"match"`
 }
 
 func CreateUpdateTask(r *UpdateRequest) (*asynq.Task, error) {
@@ -30,7 +30,7 @@ func CreateUpdateTask(r *UpdateRequest) (*asynq.Task, error) {
 
 	task := asynq.NewTask(
 		TypeUpdateRequest, payload,
-		asynq.TaskID(fmt.Sprintf("update-request-%d", r.Id)),
+		asynq.TaskID(fmt.Sprintf("update-request-%d", r.GameId)),
 		asynq.MaxRetry(3),
 	)
 

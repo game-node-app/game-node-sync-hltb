@@ -30,7 +30,7 @@ func Games(q string) (*HLTBResponse, error) {
 	}
 
 	parsedGameName := parseGameName(q)
-	log.Printf(" [X] Parsed game game - from: %s to: %s", q, parsedGameName)
+	log.Printf(" [x] Parsed name - from: %s to: %s", q, parsedGameName)
 	searchCriteria := strings.Split(parsedGameName, " ")
 	targetUrl := searchEndpoint(apiKey)
 	body := searchBody(searchCriteria)

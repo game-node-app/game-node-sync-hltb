@@ -59,7 +59,7 @@ func main() {
 				log.Printf(" [!] Failed to parse message: %s - error: %s", d.Body, err)
 				continue
 			}
-			log.Printf(" [x] Received request to update gameId: %d - with name: %s", request.Id, request.Name)
+			log.Printf(" [x] Received request to update gameId: %d - with name: %s", request.GameId, request.Name)
 
 			task, err := queue.CreateUpdateTask(&request)
 			if err != nil {
