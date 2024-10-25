@@ -16,13 +16,25 @@ You can also change the RabbitMQ URL (default: `amqp://localhost:5672`) by setti
 If possible, have [game-node-server](https://github.com/game-node-app/game-node-server) set up before this.
 
 ### Starting
-After installing the project dependencies, simply use these commands to start each service:  
+After installing the project dependencies (`go mod download`), simply use these commands to start each service:  
 ```shell
-
+# Starts the 'listener' process
 go run cmd/listener/main.go
 
+# Starts the 'processor' process
 go run cmd/processor/main.go
 ```
+
+### Using the Docker image
+You can also use this service by pulling and running the `lamarcke/game-node-sync-hltb` image.  
+```shell
+# Starts the 'listener' process with the 'hltb-listener' container name
+docker run --name hltb-listener lamarcke/game-node-sync-hltb /app/listener
+
+# Starts the 'processor' process with the 'hltb-processor' container name
+docker run --name hltb-processor lamarcke/game-node-sync-hltb /app/processor
+```
+See the `docker-compose.prod.yml` for a compose file example.
 
 ### Implementation
 This Go app has two main entrypoints:
