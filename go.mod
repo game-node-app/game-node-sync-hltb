@@ -11,6 +11,7 @@ require (
 )
 
 require (
+	github.com/AsidStorm/go-amqp-reconnect/rabbitmq v0.0.0-20240810055454-769088980e2c // indirect
 	github.com/PuerkitoBio/goquery v1.10.0 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/antchfx/htmlquery v1.3.3 // indirect

@@ -4,15 +4,14 @@ import (
 	"game-node-sync-hltb/internal/queue"
 	"game-node-sync-hltb/internal/util"
 	"game-node-sync-hltb/internal/util/redis"
+	"github.com/AsidStorm/go-amqp-reconnect/rabbitmq"
 	"github.com/hibiken/asynq"
-	amqp "github.com/rabbitmq/amqp091-go"
 	"log"
 )
 
 func main() {
-
 	rabbitMqUrl := util.RMQUrl()
-	conn, err := amqp.Dial(rabbitMqUrl)
+	conn, err := rabbitmq.Dial(rabbitMqUrl)
 
 	if err != nil {
 		log.Fatalf("Failed to connect to RabbitMQ: %s", err)
