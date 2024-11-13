@@ -47,9 +47,19 @@ type HLTBResponseItem struct {
 	ReleaseWorld    int    `json:"release_world"`
 }
 
+type HLTBSearchRequestOptionsUsers struct {
+	Id           string `json:"id"`
+	SortCategory string `json:"sortCategory"`
+}
+
+type HLTBSearchRequestOptions struct {
+	Users HLTBSearchRequestOptionsUsers `json:"users"`
+}
+
 type HLTBSearchRequest struct {
-	SearchType  string   `json:"searchType"`
-	SearchTerms []string `json:"searchTerms"`
-	SearchPage  int      `json:"searchPage"`
-	Size        int      `json:"size"`
+	SearchType    string                   `json:"searchType"`
+	SearchTerms   []string                 `json:"searchTerms"`
+	SearchPage    int                      `json:"searchPage"`
+	Size          int                      `json:"size"`
+	SearchOptions HLTBSearchRequestOptions `json:"searchOptions"`
 }
