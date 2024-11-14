@@ -3,6 +3,7 @@ module game-node-sync-hltb
 go 1.23.1
 
 require (
+	github.com/AsidStorm/go-amqp-reconnect/rabbitmq v0.0.0-20240810055454-769088980e2c
 	github.com/gocolly/colly v1.2.0
 	github.com/hibiken/asynq v0.24.1
 	github.com/rabbitmq/amqp091-go v1.10.0
@@ -11,7 +12,6 @@ require (
 )
 
 require (
-	github.com/AsidStorm/go-amqp-reconnect/rabbitmq v0.0.0-20240810055454-769088980e2c // indirect
 	github.com/PuerkitoBio/goquery v1.10.0 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/antchfx/htmlquery v1.3.3 // indirect
@@ -36,5 +36,5 @@ require (
 	golang.org/x/time v0.7.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/protobuf v1.35.1 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
+	gopkg.in/yaml.v3 v3.0.0 // indirect
 )
