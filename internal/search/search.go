@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"game-node-sync-hltb/internal/scraper"
 	"log"
 	"net/http"
 	"strings"
@@ -17,29 +18,28 @@ func searchBody(searchCriteria []string) *HLTBSearchRequest {
 		Size:        20,
 		SearchOptions: HLTBSearchRequestOptions{
 			Users: HLTBSearchRequestOptionsUsers{
-				Id:           "90f8120e015db09f",
+				//Id:           "90f8120e015db09f",
 				SortCategory: "postcount",
 			},
 		},
 	}
 }
 
-func searchEndpoint() string {
-	return fmt.Sprintf("https://howlongtobeat.com/api/search")
+func searchEndpoint(apiKey string) string {
+	return fmt.Sprintf("https://howlongtobeat.com/api/search/%s", apiKey)
 }
 
 func Games(q string) (*HLTBResponse, error) {
-	// API Key temporarily not necessary...
-	//apiKey, err := scraper.GetApiKey()
-	//if err != nil {
-	//	log.Printf(" [!] Failed to retrieve API Key: %v", err)
-	//	return nil, err
-	//}
+	apiKey, err := scraper.GetApiKey()
+	if err != nil {
+		log.Printf(" [!] Failed to retrieve API Key: %v", err)
+		return nil, err
+	}
 
 	parsedGameName := parseGameName(q)
 	log.Printf(" [x] Parsed name - from: %s to: %s", q, parsedGameName)
 	searchCriteria := strings.Split(parsedGameName, " ")
-	targetUrl := searchEndpoint()
+	targetUrl := searchEndpoint(apiKey)
 	body := searchBody(searchCriteria)
 
 	bodyJson, err := json.Marshal(body)

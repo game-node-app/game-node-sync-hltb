@@ -48,7 +48,7 @@ type HLTBResponseItem struct {
 }
 
 type HLTBSearchRequestOptionsUsers struct {
-	Id           string `json:"id"`
+	//Id           string `json:"id"`
 	SortCategory string `json:"sortCategory"`
 }
 
