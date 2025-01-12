@@ -2,6 +2,10 @@
 
 The GameNode sync system for HLTB.
 
+# Deprecated
+This repository is here for historical purposes. We have abandoned the idea of HowLongToBeat syncing because of their constant attempts to difficult API querying.  
+We understand their reasons and respect their decision, and as such, this repository is no longer maintained.
+
 ## Usage
 This service is dependent on [game-node-server](https://github.com/game-node-app/game-node-server), since the RabbitMQ 
 instance is configured there. Have it set-up before proceeding.
